@@ -1,22 +1,72 @@
-name: CI
+name: Build & Release
 
 on:
   push:
+    branches:
+      - main
     paths:
-      - ".github/workflows/**"
+      - "**"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macos-latest
+            rid: osx-x64
+          - os: windows-latest
+            rid: win-x64
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download artifacts from previous build
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish
+        run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained true -o publish/${{ matrix.rid }}
+
+      - name: Zip artifact
+        run: |
+          cd publish
+          zip -r ../${{ matrix.rid }}.zip ${{ matrix.rid }}
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.rid }}
+          path: ${{ matrix.rid }}.zip
+
+  release-existing-tag:
+    name: Release Existing Tag (v1.1.0)
+    needs: build
+    runs-on: ubuntu-latest
+
+    # YAML push で実行したい → コミットメッセージに [release] を入れる
+    if: contains(github.event.head_commit.message, '[release]') || github.event_name == 'workflow_dispatch'
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
@@ -24,9 +74,10 @@ jobs:
       - name: Rename artifacts to json_Gatchanko_Tool
         run: |
           mkdir renamed
-          for f in artifacts/*/*.zip; do
+          # artifacts 以下の ZIP を全部拾う
+          for f in $(find artifacts -name "*.zip"); do
             base=$(basename "$f")
-            osname="${base%.*}"   # win-x64 / linux-x64 / osx-x64 など
+            osname="${base%.*}"   # win-x64 / linux-x64 / osx-x64
             cp "$f" "renamed/json_Gatchanko_Tool-${osname}.zip"
           done
 
