@@ -1,3 +1,21 @@
+name: Build & Release (Python)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/*.yml" # YAMLを書き換えてプッシュした時に発動
+      - "**.py"                   # Pythonコードを変えた時も一応入れています
+  workflow_dispatch: # 手動実行ボタン（テスト用に残すと吉）
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -26,21 +44,17 @@
 
       - name: Build executable
         run: |
-          # Linux/Macでは拡張子なし、Windowsは .exe が自動で付く
+          # PyInstaller実行。Windowsは自動で.exeが付与される
           pyinstaller --onefile --name json_Gatchanko_Tool main.py
 
       - name: Zip artifact
         shell: bash
         run: |
-          # distの中身を固める
-          # -j オプションを入れると、zipの中に余計なフォルダ階層を作らずファイルを直下に入れます
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            # Windows(Git Bash環境)での圧縮
+          # フォルダ階層を含めず、distの中身だけを固める
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             7z a "json_Gatchanko_Tool-${{ matrix.suffix }}.zip" ./dist/*
           else
-            # Linux/Macでの圧縮
-            cd dist
-            zip -r "../json_Gatchanko_Tool-${{ matrix.suffix }}.zip" .
+            cd dist && zip -r "../json_Gatchanko_Tool-${{ matrix.suffix }}.zip" .
           fi
 
       - name: Upload artifact
@@ -48,3 +62,31 @@
         with:
           name: ${{ matrix.suffix }}
           path: json_Gatchanko_Tool-${{ matrix.suffix }}.zip
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    # タグがないプッシュの場合、暫定タグ「latest」としてリリースを作成/更新する設定
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # タグがない場合は "latest-build" という名前でリリースを作成
+          tag_name: "latest-build"
+          name: "Latest Automated Build"
+          files: ./artifacts/**/*.zip
+          # 既存のリリースを上書き（常に最新版を置く）
+          overwrite: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
