@@ -10,7 +10,6 @@
     background: #f5f7fa;
     margin: 0;
     padding: 0;
-    text-align: center;
   }
   header {
     background: #0078D7;
@@ -18,46 +17,55 @@
     padding: 25px 10px;
     font-size: 26px;
     font-weight: bold;
+    text-align: center;
   }
   .container {
-    max-width: 600px;
+    max-width: 750px;
     margin: 40px auto;
     padding: 0 20px;
   }
   .desc {
+    text-align: center;
     font-size: 16px;
     margin-bottom: 30px;
     color: #333;
   }
-  .dl-box {
+  .platform {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-  }
-  .dl-title {
-    font-size: 20px;
+    padding: 18px 20px;
     margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  }
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .left img {
+    width: 40px;
+    height: 40px;
+  }
+  .name {
+    font-size: 18px;
     font-weight: bold;
   }
   .btn {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    margin: 10px 0;
-    border-radius: 8px;
-    text-decoration: none;
+    padding: 10px 18px;
+    background: #0078D7;
     color: white;
-    font-size: 16px;
+    border-radius: 6px;
+    text-decoration: none;
     font-weight: bold;
+    font-size: 14px;
   }
-  .win { background: #0078D7; }
-  .mac { background: #555; }
-  .linux { background: #2E8B57; }
   footer {
     margin-top: 40px;
     padding: 20px;
+    text-align: center;
     color: #666;
     font-size: 14px;
   }
@@ -70,24 +78,42 @@
 <div class="container">
   <p class="desc">
     JSON をフォルダごと一括で配列にまとめるツールです。<br>
-    最新の自動ビルド版を OS 別にダウンロードできます。
+    お使いの OS を選んでダウンロードしてください。
   </p>
 
-  <div class="dl-box">
-    <div class="dl-title"> ダウンロード</div>
-
-    <a class="btn win" href="https://github.com/frisk-V3/json_Gatchanko_Tool/releases/download/v2.0.0/json_Gatchanko_Tool-win.zip">
-      Windows 版（ZIP）
-    </a>
-
-    <a class="btn mac" href="https://github.com/frisk-V3/json_Gatchanko_Tool/releases/download/v2.0.0/json_Gatchanko_Tool-mac.zip">
-      macOS 版（ZIP）
-    </a>
-
-    <a class="btn linux" href="https://github.com/frisk-V3/json_Gatchanko_Tool/releases/download/v2.0.0/json_Gatchanko_Tool-linux.zip">
-      Linux 版（.deb 入り ZIP）
+  <!-- Windows -->
+  <div class="platform">
+    <div class="left">
+      <img src="https://img.icons8.com/ios-filled/100/0078D7/windows-logo.png">
+      <div class="name">Windows</div>
+    </div>
+    <a class="btn" href="https://github.com/frisk-V3/json_Gatchanko_Tool/releases/download/v2.0.0/json_Gatchanko_Tool-win.zip">
+      Standard
     </a>
   </div>
+
+  <!-- macOS -->
+  <div class="platform">
+    <div class="left">
+      <img src="https://img.icons8.com/ios-filled/100/555555/mac-os.png">
+      <div class="name">macOS</div>
+    </div>
+    <a class="btn" href="https://github.com/frisk-V3/json_Gatchanko_Tool/releases/download/v2.0.0/json_Gatchanko_Tool-mac.zip">
+      Standard
+    </a>
+  </div>
+
+  <!-- Linux -->
+  <div class="platform">
+    <div class="left">
+      <img src="https://img.icons8.com/ios-filled/100/2E8B57/linux.png">
+      <div class="name">Linux</div>
+    </div>
+    <a class="btn" href="https://github.com/frisk-V3/json_Gatchanko_Tool/releases/download/v2.0.0/json_Gatchanko_Tool-linux.zip">
+      Standard
+    </a>
+  </div>
+
 </div>
 
 <footer>
